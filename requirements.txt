@@ -1,0 +1,26 @@
+# Core dependencies with forced versions
+jax==0.3.24
+jaxlib==0.3.24
+flax==0.5.3
+protobuf==3.20.3
+optax==0.1.6
+numpy<2
+
+# Core dependencies
+numpy<2
+ftfy
+regex
+tqdm
+fvcore
+imageio==2.4.1
+imageio-ffmpeg==0.4.5
+gdown
+pybullet
+moviepy
+openai
+easydict
+opencv-python
+ipykernel
+
+# CLIP from source
+git+https://github.com/openai/CLIP.git
