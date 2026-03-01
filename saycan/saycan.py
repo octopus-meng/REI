@@ -7,7 +7,7 @@ import clip
 from scene import PickPlaceEnv, PICK_TARGETS, PLACE_TARGETS
 from cliport import Cliport
 from vild import ViLD
-from llm_scoring import make_options, affordance_scoring, build_scene_description, gpt3_scoring, normalize_scores, plot_saycan, step_to_nlp
+from llm_scoring import make_options, affordance_scoring, build_scene_description, step_to_nlp, LLM_Scoring
 #@title Prompt
 
 termination_string = "done()"
@@ -143,14 +143,14 @@ affordance_scores = affordance_scoring(options, found_objects, block_name="box",
 num_tasks = 0
 selected_task = ""
 steps_text = []
+llm_scorer = LLM_Scoring()
 while not selected_task == termination_string:
   num_tasks += 1
   if num_tasks > max_tasks:
     break
-
-  llm_scores, _ = gpt3_scoring(gpt3_prompt, options, verbose=True, engine="qwen3-30b-a3b-instruct-2507", print_tokens=False)
+  llm_scores, _ = llm_scorer.batch_scoring(gpt3_prompt, options, verbose=True)
   combined_scores = {option: np.exp(llm_scores[option]) * affordance_scores[option] for option in options}
-  combined_scores = normalize_scores(combined_scores)
+  combined_scores = llm_scorer.normalize_scores(combined_scores)
   selected_task = max(combined_scores, key=combined_scores.get)
   steps_text.append(selected_task)
   print(num_tasks, "Selecting: ", selected_task)
@@ -160,10 +160,10 @@ while not selected_task == termination_string:
   all_affordance_scores.append(affordance_scores)
   all_combined_scores.append(combined_scores)
 
-if plot_on:
-  for llm_scores, affordance_scores, combined_scores, step in zip(
-      all_llm_scores, all_affordance_scores, all_combined_scores, steps_text):
-    plot_saycan(llm_scores, affordance_scores, combined_scores, step, show_top=10)
+# if plot_on:
+#   for llm_scores, affordance_scores, combined_scores, step in zip(
+#       all_llm_scores, all_affordance_scores, all_combined_scores, steps_text):
+#     plot_saycan(llm_scores, affordance_scores, combined_scores, step, show_top=10)
 
 print('**** Solution ****')
 cliport = Cliport(clip_model=clip_model)
@@ -190,3 +190,4 @@ if not only_plan:
   # Show camera image after task.
   print('Final state:')
   plt.imshow(env.get_camera_image())
+env.cache_video = []

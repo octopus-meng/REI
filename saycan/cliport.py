@@ -265,7 +265,6 @@ class Cliport:
     # Show video of environment rollout.
     debug_clip = ImageSequenceClip(env.cache_video, fps=25)
     debug_clip.write_videofile("output.mp4", fps=25) 
-    env.cache_video = []
 
     # Show camera image after pick and place.
     plt.subplot(1, 2, 1)
